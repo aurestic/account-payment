@@ -30,4 +30,4 @@ class AccountMoveLine(models.Model):
     payment_mode_id = fields.Many2one(
         'payment.mode',
         related='stored_invoice_id.payment_mode_id',
-        string="Payment Mode", store=True)
+        string="Payment Mode", store=False)
