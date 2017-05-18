@@ -40,12 +40,12 @@ class AccountMoveLine(models.Model):
                                       string='Payment Terms')
     stored_invoice_id = fields.Many2one(
         comodel_name='account.invoice', compute='_compute_invoice',
-        string='Invoice', store=True)
+        string='Invoice', store=False)
     invoice_user_id = fields.Many2one(
         comodel_name='res.users', related='stored_invoice_id.user_id',
-        string="Invoice salesperson", store=True)
+        string="Invoice salesperson", store=False)
     maturity_residual = fields.Float(
-        compute='_maturity_residual', string="Residual Amount", store=True,
+        compute='_maturity_residual', string="Residual Amount", store=False,
         help="The residual amount on a receivable or payable of a journal "
              "entry expressed in the company currency.")
 
