@@ -36,23 +36,32 @@ def post_init_hook(cr, pool):
 
 
 def store_field_stored_invoice_id(cr):
-    cr.execute(
-        """
-        ALTER TABLE account_move_line ADD COLUMN stored_invoice_id integer;
-        COMMENT ON COLUMN account_move_line.stored_invoice_id IS 'Invoice';
-        """)
+    cr.execute("""
+        SELECT EXISTS(
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema='public'
+              and table_name='account_move_line'
+              and column_name='stored_invoice_id')""")
+    exists = cr.fetchone()[0]
+    if not exists:
+        cr.execute(
+            """
+            ALTER TABLE account_move_line ADD COLUMN stored_invoice_id integer;
+            COMMENT ON COLUMN account_move_line.stored_invoice_id IS 'Invoice';
+            """)
 
-    logger.info('Computing field stored_invoice_id on account.move.line')
+        logger.info('Computing field stored_invoice_id on account.move.line')
 
-    cr.execute(
-        """
-        UPDATE account_move_line aml
-        SET stored_invoice_id = inv.id
-        FROM account_move AS am, account_invoice AS inv
-        WHERE am.id = aml.move_id
-        AND am.id = inv.move_id
-        """
-    )
+        cr.execute(
+            """
+            UPDATE account_move_line aml
+            SET stored_invoice_id = inv.id
+            FROM account_move AS am, account_invoice AS inv
+            WHERE am.id = aml.move_id
+            AND am.id = inv.move_id
+            """
+        )
 
 
 def store_field_invoice_user_id(cr):
