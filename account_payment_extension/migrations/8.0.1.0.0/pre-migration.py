@@ -76,10 +76,12 @@ def migrate_payment_types(pool, cr, uid):
                     cr,
                     """
                     INSERT INTO payment_mode
-                    (name, active, journal, bank_id, company_id)
-                    VALUES (%s, %s, %s, %s, %s)
-                    RETURNING id;""", (payment_type[1], payment_type[2],
-                                       journal_id, bank_id, company_id))
+                    (name, active, journal, bank_id, company_id, type)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id;""", (
+                        # Hemos añadido esto
+                        payment_type[1], payment_type[2],
+                        journal_id, bank_id, company_id, payment_type[0]))
                 payment_modes = cr.fetchall()
             # Write in invoices the first corresponding payment mode
             openupgrade.logged_query(
