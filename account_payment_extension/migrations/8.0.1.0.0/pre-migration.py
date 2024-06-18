@@ -14,20 +14,21 @@ column_renames = {
 
 def migrate_payment_types(pool, cr, uid):
     # Add manually payment needed columns
-    cr.execute('ALTER TABLE account_invoice ADD COLUMN payment_mode_id int')
-    cr.execute('ALTER TABLE payment_mode ADD COLUMN active bool')
+    cr.execute('ALTER TABLE account_invoice ADD COLUMN IF NOT EXISTS payment_mode_id int')
+    cr.execute('ALTER TABLE payment_mode ADD COLUMN IF NOT EXISTS active bool')
     # Remove some constraints
     cr.execute('ALTER TABLE payment_mode ALTER journal DROP NOT NULL')
     cr.execute('ALTER TABLE payment_mode ALTER bank_id DROP NOT NULL')
     cr.execute('ALTER TABLE bank_type_payment_type_rel DROP CONSTRAINT '
                'bank_type_payment_type_rel_pay_type_id_fkey')
-    # Rename many2many table
-    cr.execute('ALTER TABLE bank_type_payment_type_rel RENAME TO '
-               'bank_type_payment_type_rel_old')
-    cr.execute('ALTER INDEX bank_type_payment_type_rel_pay_type_id_index '
-               'RENAME TO bank_type_payment_type_rel_pay_type_id_index_old')
-    cr.execute('ALTER INDEX bank_type_payment_type_rel_bank_type_id_index '
-               'RENAME TO bank_type_payment_type_rel_bank_type_id_index_old')
+    # ! Lo utilizan módulos como account_direct_debit
+    # # Rename many2many table
+    # cr.execute('ALTER TABLE bank_type_payment_type_rel RENAME TO '
+    #            'bank_type_payment_type_rel_old')
+    # cr.execute('ALTER INDEX bank_type_payment_type_rel_pay_type_id_index '
+    #            'RENAME TO bank_type_payment_type_rel_pay_type_id_index_old')
+    # cr.execute('ALTER INDEX bank_type_payment_type_rel_bank_type_id_index '
+    #            'RENAME TO bank_type_payment_type_rel_bank_type_id_index_old')
     # Switch payment types by payment modes
     cr.execute("SELECT id, name, active, company_id FROM payment_type")
     payment_types = cr.fetchall()
@@ -94,7 +95,7 @@ def migrate_payment_types(pool, cr, uid):
 def migrate_payment_order(cr):
     # Add manually new payment type column
     cr.execute(
-        'ALTER TABLE payment_order ADD COLUMN payment_order_type varchar')
+        'ALTER TABLE payment_order ADD COLUMN IF NOT EXISTS payment_order_type varchar')
     # Map types
     openupgrade.logged_query(
         cr, """
